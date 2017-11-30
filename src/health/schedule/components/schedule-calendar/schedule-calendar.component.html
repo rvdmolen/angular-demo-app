@@ -1,0 +1,12 @@
+<div class="calendar">
+
+    <schedule-controls
+        [selected]="selectedDay"
+        (move)="onMove($event)">
+    </schedule-controls>
+
+    <schedule-days
+        [selected]="selectedDayIndex"
+        (select)="onSelect($event)">
+    </schedule-days>
+</div>
