@@ -9,6 +9,7 @@ import {ScheduleAssignComponent} from './components/schedule-assign/schedule-ass
 import {ScheduleControlsComponent} from './components/schedule-controls/schedule-controls.component';
 import {ScheduleDaysComponent} from './components/schedule-days/schedule-days.component';
 import {ScheduleSectionComponent} from './components/schedule-section/schedule-section.component';
+import {SharedModule} from '../../auth/shared/shared.module';
 
 
 @NgModule({
@@ -16,7 +17,8 @@ import {ScheduleSectionComponent} from './components/schedule-section/schedule-s
         CommonModule,
         ScheduleRoutingModule,
         RouterModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        SharedModule
     ],
     declarations: [
         ScheduleComponent,

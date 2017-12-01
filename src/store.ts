@@ -6,10 +6,12 @@ import 'rxjs/add/operator/distinctUntilChanged';
 import {User} from './app/model/user';
 import {Meal} from './app/model/meal';
 import {Workout} from './app/model/workout';
+import {ScheduleItem} from './app/model/schedule-item';
 
 export interface State {
     user: User,
     meals: Meal[],
+    schedule: ScheduleItem[],
     date: Date;
     workouts: Workout[],
     [key: string]: any
@@ -18,6 +20,7 @@ export interface State {
 const state: State = {
     user: undefined,
     meals: undefined,
+    schedule: undefined,
     workouts: undefined,
     date: undefined
 };
