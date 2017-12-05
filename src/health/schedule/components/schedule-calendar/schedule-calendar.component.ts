@@ -28,6 +28,7 @@ export class ScheduleCalendarComponent implements OnInit, OnChanges {
     ];
 
     @Output() change = new EventEmitter<Date>();
+    @Output() select = new EventEmitter<any>();
 
     constructor() {
     }
@@ -52,8 +53,8 @@ export class ScheduleCalendarComponent implements OnInit, OnChanges {
     }
 
     ngOnChanges() {
-        this.selectedWeek = this.getStartOfWeek(new Date());
         this.selectedDayIndex = this.getToDay(this.selectedDay);
+        this.selectedWeek = this.getStartOfWeek(new Date(this.selectedDay));
     }
 
     private getToDay(date: Date) {
@@ -72,6 +73,17 @@ export class ScheduleCalendarComponent implements OnInit, OnChanges {
 
     getSection(name: string): ScheduleItem {
         return this.items && this.items[name] || {};
+    }
+
+    selectSection({type, assigned, data}: any, section: string) {
+        const day = this.selectedDay;
+        this.select.emit({
+            type,
+            assigned,
+            data,
+            section,
+            day
+        });
     }
 
 }
