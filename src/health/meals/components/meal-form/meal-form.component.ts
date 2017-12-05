@@ -1,69 +1,161 @@
-import {
-    ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnInit, Output,
-    SimpleChanges
-} from '@angular/core';
-import {FormArray, FormBuilder, FormControl, FormGroup, Validators} from '@angular/forms';
+import {Component, OnChanges, SimpleChanges, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
+import {FormArray, FormGroup, FormBuilder, FormControl, Validators} from '@angular/forms';
 import {Meal} from '../../../../app/model/meal';
+
 
 @Component({
     selector: 'meal-form',
-    templateUrl: 'meal-form.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush,
     styleUrls: ['meal-form.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    template: `
+        <div class="meal-form">
+
+            <form [formGroup]="form">
+
+                <div class="meal-form__name">
+                    <label>
+                        <h3>Meal name</h3>
+                        <input
+                            type="text"
+                            placeholder="e.g. English Breakfast"
+                            formControlName="name">
+                        <div class="error" *ngIf="required">
+                            Workout name is required
+                        </div>
+                    </label>
+                </div>
+
+                <div class="meal-form__food">
+                    <div class="meal-form__subtitle">
+                        <h3>Food</h3>
+                        <button
+                            type="button"
+                            class="meal-form__add"
+                            (click)="addIngredient()">
+                            <img src="/img/add-white.svg">
+                            Add food
+                        </button>
+                    </div>
+                    <div formArrayName="ingredients">
+                        <label *ngFor="let c of ingredients.controls; index as i;">
+                            <input [formControlName]="i" placeholder="e.g. Eggs">
+                            <span
+                                class="meal-form__remove"
+                                (click)="removeIngredient(i)">
+              </span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="meal-form__submit">
+                    <div>
+                        <button
+                            type="button"
+                            class="button"
+                            *ngIf="!exists"
+                            (click)="createMeal()">
+                            Create meal
+                        </button>
+                        <button
+                            type="button"
+                            class="button"
+                            *ngIf="exists"
+                            (click)="updateMeal()">
+                            Save
+                        </button>
+                        <a
+                            class="button button--cancel"
+                            [routerLink]="['../']">
+                            Cancel
+                        </a>
+                    </div>
+
+                    <div class="meal-form__delete" *ngIf="exists">
+                        <div *ngIf="toggled">
+                            <p>Delete item?</p>
+                            <button
+                                class="confirm"
+                                type="button"
+                                (click)="removeMeal()">
+                                Yes
+                            </button>
+                            <button
+                                class="cancel"
+                                type="button"
+                                (click)="toggle()">
+                                No
+                            </button>
+                        </div>
+
+                        <button class="button button--delete" type="button" (click)="toggle()">
+                            Delete
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+    `
 })
-
-export class MealFormComponent implements OnInit, OnChanges {
-
-    @Input() meal: Meal;
-    form: FormGroup;
-
-    @Output() create = new EventEmitter<Meal>();
-    @Output() update = new EventEmitter<Meal>();
-    @Output() remove = new EventEmitter<Meal>();
+export class MealFormComponent implements OnChanges {
 
     toggled = false;
     exists = false;
 
-    constructor(
-        private fb: FormBuilder
-    ) {
-        this.form = this.fb.group({
-            name: ['', Validators.required],
-            ingredients: this.fb.array([''])
-        });
-    }
+    @Input()
+    meal: Meal;
 
-    ngOnInit() {
+    @Output()
+    create = new EventEmitter<Meal>();
 
+    @Output()
+    update = new EventEmitter<Meal>();
+
+    @Output()
+    remove = new EventEmitter<Meal>();
+
+    form = this.fb.group({
+        name: ['', Validators.required],
+        ingredients: this.fb.array([''])
+    });
+
+    constructor(private fb: FormBuilder) {
     }
 
     ngOnChanges(changes: SimpleChanges) {
-        if (changes.meal.currentValue.name) {
-            this.exists = true;
-        }
-
-        if ((this.meal) && (this.meal.name)) {
+        if (this.meal && this.meal.name) {
             this.exists = true;
             this.emptyIngredients();
 
             const value = this.meal;
             this.form.patchValue(value);
 
-            value.ingredients.forEach(ingredient => {
-               this.ingredients.push(new FormControl(ingredient));
-            });
-
+            if (value.ingredients) {
+                for (const item of value.ingredients) {
+                    this.ingredients.push(new FormControl(item));
+                }
+            }
 
         }
     }
 
-    get ingredients() {
-        return this.form.get('ingredients') as FormArray;
+    emptyIngredients() {
+        while (this.ingredients.controls.length) {
+            this.ingredients.removeAt(0);
+        }
     }
 
     get required() {
-        return this.form.get('name').hasError('required') &&
-            this.form.get('name').touched;
+        return (
+            this.form.get('name').hasError('required') &&
+            this.form.get('name').touched
+        );
+    }
+
+    get ingredients() {
+        return this.form.get('ingredients') as FormArray;
     }
 
     addIngredient() {
@@ -80,23 +172,18 @@ export class MealFormComponent implements OnInit, OnChanges {
         }
     }
 
-    removeMeal() {
-        this.remove.emit(this.form.value);
-    }
-
     updateMeal() {
         if (this.form.valid) {
             this.update.emit(this.form.value);
         }
     }
 
+    removeMeal() {
+        this.remove.emit(this.form.value);
+    }
+
     toggle() {
         this.toggled = !this.toggled;
     }
 
-    emptyIngredients() {
-        while (this.ingredients.controls.length > 0) {
-            this.ingredients.removeAt(0);
-        }
-    }
 }

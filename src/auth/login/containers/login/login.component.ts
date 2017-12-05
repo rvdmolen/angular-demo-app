@@ -1,35 +1,42 @@
-import {Component, OnInit} from '@angular/core';
-import {FormGroup} from '@angular/forms';
+import { Component } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
 import {AuthService} from '../../../shared/auth/auth-service/auth-service';
-import {Router} from '@angular/router';
+
 
 @Component({
-    selector: 'login',
-    templateUrl: './login.component.html'
+  selector: 'login',
+  template: `
+    <div>
+      <auth-form (submitted)="loginUser($event)">
+        <h1>Login</h1>
+        <a routerLink="/auth/register">Not registered?</a>
+        <button type="submit">
+          Login
+        </button>
+        <div class="error" *ngIf="error">
+          {{ error }}
+        </div>
+      </auth-form>
+    </div>
+  `
 })
+export class LoginComponent {
 
-export class LoginComponent implements OnInit {
+  error: string;
 
-    public error: string;
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-    constructor(
-        private authService: AuthService,
-        private router: Router
-    ) {
+  async loginUser(event: FormGroup) {
+    const { email, password } = event.value;
+    try {
+      await this.authService.login(email, password);
+      this.router.navigate(['/']);
+    } catch (err) {
+      this.error = err.message;
     }
-
-    ngOnInit() {
-    }
-
-    async login(form: FormGroup) {
-        const {email, password} = form.value;
-        try {
-            await this.authService.login(email, password);
-            await this.router.navigate(['/']);
-        } catch(err) {
-            this.error = err.message;
-        }
-    }
-
-
- }
+  }
+}

@@ -1,26 +1,34 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import {User} from '../../model/user';
 
+
 @Component({
-    selector: 'app-header',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    templateUrl: 'app-header.component.html',
-    styleUrls: ['app-header.component.scss']
+  selector: 'app-header',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['app-header.component.scss'],
+  template: `
+    <div class="app-header">
+      <div class="wrapper">
+        <img src="/img/logo.svg">
+        <div 
+          class="app-header__user-info"
+          *ngIf="user?.authenticated">
+          <span (click)="logoutUser()"></span>
+        </div>
+      </div>
+    </div>
+  `
 })
+export class AppHeaderComponent {
 
-export class AppHeaderComponent implements OnInit {
+  @Input()
+  user: User;
 
-    @Input() user: User;
+  @Output()
+  logout = new EventEmitter<any>();
 
-    @Output() logout = new EventEmitter<any>();
+  logoutUser() {
+    this.logout.emit();
+  }
 
-    constructor() {
-    }
-
-    ngOnInit() {
-    }
-
-    logOutUser() {
-        this.logout.emit();
-    }
 }

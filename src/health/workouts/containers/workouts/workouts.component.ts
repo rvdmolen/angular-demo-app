@@ -1,25 +1,57 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
+
+import {Store} from 'store';
+
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {Store} from 'store';
 import {Workout} from '../../../../app/model/workout';
 import {WorkoutsService} from '../../../shared/services/workouts/workouts.service';
 
+
 @Component({
     selector: 'workouts',
-    templateUrl: 'workouts.component.html',
-    styleUrls: ['workouts.component.scss']
+    styleUrls: ['workouts.component.scss'],
+    template: `
+        <div class="workouts">
+            <div class="workouts__title">
+                <h1>
+                    <img src="/img/workout.svg">
+                    Your workouts
+                </h1>
+                <a
+                    class="btn__add"
+                    [routerLink]="['../workouts/new']">
+                    <img src="/img/add-white.svg">
+                    New workout
+                </a>
+            </div>
+            <div *ngIf="workouts$ | async as workouts; else loading;">
+                <div class="message" *ngIf="!workouts.length">
+                    <img src="/img/face.svg">
+                    No workouts, add a new workout to start
+                </div>
+                <list-item
+                    *ngFor="let workout of workouts"
+                    [item]="workout"
+                    (remove)="removeWorkout($event)">
+                </list-item>
+            </div>
+            <ng-template #loading>
+                <div class="message">
+                    <img src="/img/loading.svg">
+                    Fetching workouts...
+                </div>
+            </ng-template>
+        </div>
+    `
 })
-
 export class WorkoutsComponent implements OnInit, OnDestroy {
 
     workouts$: Observable<Workout[]>;
     subscription: Subscription;
 
-    constructor(
-        private workoutsService: WorkoutsService,
-        private store: Store
-    ) {
+    constructor(private store: Store,
+                private workoutsService: WorkoutsService) {
     }
 
     ngOnInit() {
@@ -31,7 +63,8 @@ export class WorkoutsComponent implements OnInit, OnDestroy {
         this.subscription.unsubscribe();
     }
 
-    onRemove(workout: Workout) {
-        this.workoutsService.removeWorkout(workout.$key);
+    removeWorkout(event: Workout) {
+        this.workoutsService.removeWorkout(event.$key);
     }
+
 }
